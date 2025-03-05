@@ -1,3 +1,11 @@
 import { Sequelize } from 'sequelize';
-const sequelize = new Sequelize(process.env.DATABASE_URL, { dialect: process.env.DATABASE_DIALECT });
+import { APP, DB } from '../constants/constants.js';
+const syncOpt = {
+    alter: !APP.IS_PROD && DB.DB_SYNC,
+    logging: !APP.IS_PROD && DB.DB_SYNC,
+};
+const sequelize = new Sequelize(DB.DB_CON_STR, {
+    dialect: DB.DB_TYPE,
+    sync: syncOpt,
+});
 export default sequelize;
