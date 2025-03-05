@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { APP, DB } from 'src/constants/constants.js';
+import { APP, DB } from '../constants/constants.js';
 
 const syncOpt = {
   alter: !APP.IS_PROD && DB.DB_SYNC,
