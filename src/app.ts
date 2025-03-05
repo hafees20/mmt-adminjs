@@ -7,11 +7,14 @@ import initializeDb from './db/index.js';
 import * as url from 'url';
 import path from 'path';
 import * as AdminJSSequelize from '@adminjs/sequelize';
-import Connect from 'connect-pg-simple';
 import session from 'express-session';
-import { SESSION } from './constants/constants.js';
+import { APP, COOKIE, SESSION } from './constants/constants.js';
+import connectPgSimple from 'connect-pg-simple';
+import pg from 'pg';
 
-const port = process.env.PORT || 3000;
+const { Pool } = pg;
+
+const port = APP.PORT;
 
 AdminJS.registerAdapter({
   Resource: AdminJSSequelize.Resource,
@@ -23,32 +26,37 @@ const start = async () => {
 
   await initializeDb();
 
-  const ConnectSession = Connect(session);
-  const sessionStore = new ConnectSession({
-    conObject: {
-      connectionString: SESSION.CON_STRING,
-      ssl: process.env.NODE_ENV === 'production',
-    },
+  const pgPool = new Pool({
+    connectionString: SESSION.CON_STRING,
+    ssl: APP.IS_PROD,
+  });
+
+  const SessionStore = connectPgSimple(session);
+
+  const sessionStore = new SessionStore({
+    pool: pgPool,
     tableName: SESSION.TABLE_NAME,
-    createTableIfMissing: true,
+    createTableIfMissing: !APP.IS_PROD,
   });
 
   app.use(
     session({
       store: sessionStore,
-      resave: true,
-      saveUninitialized: true,
+      resave: !APP.IS_PROD,
+      saveUninitialized: !APP.IS_PROD,
       secret: SESSION.SECRET,
       cookie: {
-        httpOnly: process.env.NODE_ENV === 'production',
-        secure: process.env.NODE_ENV === 'production',
+        httpOnly: APP.IS_PROD,
+        secure: APP.IS_PROD,
+        maxAge: +SESSION.SESSION_EXP,
       },
       name: SESSION.SESSION_NAME,
     })
   );
+
   const admin = new AdminJS(options);
 
-  if (process.env.NODE_ENV === 'production') {
+  if (APP.IS_PROD) {
     await admin.initialize();
   } else {
     admin.watch();
@@ -57,15 +65,15 @@ const start = async () => {
   const router = buildAuthenticatedRouter(
     admin,
     {
-      cookiePassword: process.env.COOKIE_SECRET,
-      cookieName: 'adminjs',
+      cookiePassword: COOKIE.PASS,
+      cookieName: COOKIE.NAME,
       provider,
     },
     null,
     {
-      secret: process.env.COOKIE_SECRET,
-      saveUninitialized: true,
-      resave: true,
+      secret: COOKIE.SECRET,
+      saveUninitialized: !APP.IS_PROD,
+      resave: !APP.IS_PROD,
     }
   );
 
