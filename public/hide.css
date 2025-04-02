@@ -1,0 +1,43 @@
+#app>section>section>.hZzKCo {
+	display: none;
+}
+
+/* form > h5 > .sc-fGjrnr{
+  width: 48px;
+  height: 48px;
+} */
+
+
+#app>section>section>.crhjD {
+	display: none;
+}
+
+#app>section>section>.fzYINk>h5 {
+	display: flex;
+	justify-content: center;
+}
+
+/*.adminjs_Box>section>a>svg {*/
+/*	display: none;*/
+/*}*/
+
+/* 
+
+section[data-css="sidebar"] {
+  background :red;
+}
+
+section[data-css="sidebar-resources"] {
+  background: gray;
+}
+*/
+/* 
+[data-css="sidebar-resources"]  section > ul >li >ul{
+  background: blue;
+  visibility: visible;
+}  */
+
+/* [data-css="sidebar-footer"] {
+  display: none;
+  
+} */
